@@ -6,11 +6,11 @@ import math
 
 def gripper(j1,j2, clientID, close):
     if(close == True):
-        sim.simxSetJointTargetVelocity(clientID, j2,0.04, sim.simx_opmode_oneshot)
+        sim.simxSetJointPosition(clientID, j2,0, sim.simx_opmode_oneshot)
+        sim.simxSetJointPosition(clientID, j1,0, sim.simx_opmode_oneshot)
     else:
-        sim.simxSetJointTargetVelocity(clientID, j2,-0.04, sim.simx_opmode_oneshot)
-    r, p2 = sim.simxGetJointPosition(clientID, j2,sim.simx_opmode_oneshot)
-    sim.simxSetJointTargetPosition(clientID,j1, p2*-1, sim.simx_opmode_oneshot)
+        sim.simxSetJointPosition(clientID, j2,-0.025, sim.simx_opmode_oneshot)
+        sim.simxSetJointPosition(clientID, j1,0.025, sim.simx_opmode_oneshot)
 
 
 print ('Programa inicio')
@@ -20,11 +20,11 @@ clientID=sim.simxStart('127.0.0.1',19999,True,True,5000,5)
 if clientID!=-1:
     print ('Conectado al API del servidor remoto')
 
-    _, M1 =sim.simxGetObjectHandle(clientID, 'youBotArmJoint0', sim.simx_opmode_blocking)
-    _, M2 =sim.simxGetObjectHandle(clientID, 'youBotArmJoint1', sim.simx_opmode_blocking)
-    _, M3 =sim.simxGetObjectHandle(clientID, 'youBotArmJoint2', sim.simx_opmode_blocking)
-    _, M4 =sim.simxGetObjectHandle(clientID, 'youBotArmJoint3', sim.simx_opmode_blocking)
-    _, M5 =sim.simxGetObjectHandle(clientID, 'youBotArmJoint4', sim.simx_opmode_blocking)
+    _, M1 =sim.simxGetObjectHandle(clientID, 'Joint0', sim.simx_opmode_blocking)
+    _, M2 =sim.simxGetObjectHandle(clientID, 'Joint1', sim.simx_opmode_blocking)
+    _, M3 =sim.simxGetObjectHandle(clientID, 'Joint2', sim.simx_opmode_blocking)
+    _, M4 =sim.simxGetObjectHandle(clientID, 'Joint3', sim.simx_opmode_blocking)
+    _, M5 =sim.simxGetObjectHandle(clientID, 'Joint4', sim.simx_opmode_blocking)
     sim.simxSetJointPosition(clientID, M1,0*math.pi/180,sim.simx_opmode_streaming)
     sim.simxSetJointPosition(clientID, M2,0*math.pi/180,sim.simx_opmode_streaming)
     sim.simxSetJointPosition(clientID, M3,0*math.pi/180,sim.simx_opmode_streaming)
@@ -34,16 +34,13 @@ if clientID!=-1:
     _, j1 =sim.simxGetObjectHandle(clientID, 'youBotGripperJoint1', sim.simx_opmode_blocking)
     _, j2 =sim.simxGetObjectHandle(clientID, 'youBotGripperJoint2', sim.simx_opmode_blocking)
 
-    for i in range(5):
+    for i in range(2):
         print("Abrir")
-        gripper(j1, j2, clientID, True)
-        time.sleep(2)
-        print("Cerrar")
         gripper(j1, j2, clientID, False)
         time.sleep(2)
-
-
-    #sim.simxSetJointTargetVelocity(clientID, j1,-0.02, sim.simx_opmode_blocking)
+        print("Cerrar")
+        gripper(j1, j2, clientID, True)
+        time.sleep(2)
 
     print("velocidad")
     time.sleep(1)
