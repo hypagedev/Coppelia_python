@@ -21,6 +21,9 @@ class GUI(Frame):
     clientID = -1
     base = 'Joint'
     final = 'LBR_iiwa_14_R820_connection'
+    j1 = -1
+    j2 = -1
+    close = False
 
     def __init__(self):
         super().__init__()
@@ -30,9 +33,9 @@ class GUI(Frame):
     def initUI(self):
         self.master.title("YoubotARM Robot control")
         for i in range(5):
-            tit = "M"+str(i + 1)
+            tit = "M"+str(i+1 )
             w_label = Label(self.master, text=tit).grid(row=i, column=0, pady=4, padx = 4)
-            win = Scale(self.master, from_= self.angs[i][0], to=self.angs[i][1], tickinterval= 30, orient=HORIZONTAL, resolution=2, length=450, command=lambda value, name=i: self.onScale(name, value))
+            win = Scale(self.master, from_= self.angs[i][0], to=self.angs[i][1], tickinterval= 30, orient=HORIZONTAL, resolution=1, length=450, command=lambda value, name=i: self.onScale(name, value))
             win.set(0)
             win.grid(row=i, column=1)
 
@@ -40,8 +43,10 @@ class GUI(Frame):
             self.labels_l.append(w_label)
 
         self.conectar = Button(self.master, text ="Conectar", command = self.onConnect)
-        self.conectar.grid(row=8,column=1)
+        self.conectar.grid(row=8,column=0)
 
+        self.gripb = Button(self.master, text ="Abrir/Cerrar", command = self.gripper)
+        self.gripb.grid(row=8,column=1)
 
     def onScale(self, name,value):
         if(self.clientID != -1):
@@ -59,6 +64,25 @@ class GUI(Frame):
             sim.simxSetJointPosition(self.clientID, h,0 ,sim.simx_opmode_oneshot)
         print("termino de inicializar")
 
+        _ , pos = sim.simxGetObjectPosition(self.clientID, self.j2, -1, sim.simx_opmode_streaming )
+        _ , pos = sim.simxGetObjectPosition(self.clientID, self.j1, -1, sim.simx_opmode_streaming )
+
+
+    def gripper(self):
+        if(self.clientID == -1):
+            return
+
+        if(self.close == False):
+            print("Cerrar")
+            sim.simxSetJointTargetVelocity(self.clientID, self.j2,0.04, sim.simx_opmode_oneshot)
+            sim.simxSetJointTargetPosition(self.clientID, self.j2,-0.01, sim.simx_opmode_oneshot)
+            sim.simxSetJointTargetPosition(self.clientID, self.j1,0.01, sim.simx_opmode_oneshot)
+        else:
+            sim.simxSetJointTargetVelocity(self.clientID, self.j2,-0.04, sim.simx_opmode_oneshot)
+            sim.simxSetJointTargetPosition(self.clientID, self.j1,0.025, sim.simx_opmode_oneshot_wait)
+            sim.simxSetJointTargetPosition(self.clientID, self.j2,-0.025, sim.simx_opmode_oneshot_wait)
+        self.close = ~self.close
+
 
     def onConnect(self):
         if self.clientID != -1:
@@ -74,8 +98,11 @@ class GUI(Frame):
                 nom = self.base + str(j)
                 _, handle=sim.simxGetObjectHandle(self.clientID, nom, sim.simx_opmode_blocking)
                 self.handles.append(handle)
+            _, self.j1 = sim.simxGetObjectHandle(self.clientID, 'youBotGripperJoint1', sim.simx_opmode_blocking)
+            _, self.j2 = sim.simxGetObjectHandle(self.clientID, 'youBotGripperJoint2', sim.simx_opmode_blocking)
 
             print("Conectado y envio comando al motor")
+            print(self.j1, self.j2)
             self.init_robot()
 
 def close_window():
