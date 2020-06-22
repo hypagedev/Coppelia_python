@@ -6,11 +6,14 @@ import math
 
 def gripper(j1,j2, clientID, close):
     if(close == True):
-        sim.simxSetJointPosition(clientID, j2,0, sim.simx_opmode_oneshot)
-        sim.simxSetJointPosition(clientID, j1,0, sim.simx_opmode_oneshot)
+        sim.simxSetJointTargetVelocity(clientID, j2,0.04, sim.simx_opmode_oneshot)
+        sim.simxSetJointTargetPosition(clientID, j2,-0.01, sim.simx_opmode_oneshot)
+        sim.simxSetJointTargetPosition(clientID, j1,0.01, sim.simx_opmode_oneshot)
     else:
-        sim.simxSetJointPosition(clientID, j2,-0.025, sim.simx_opmode_oneshot)
-        sim.simxSetJointPosition(clientID, j1,0.025, sim.simx_opmode_oneshot)
+        sim.simxSetJointTargetVelocity(clientID, j2,-0.04, sim.simx_opmode_oneshot)
+        sim.simxSetJointTargetPosition(clientID, j1,0.025, sim.simx_opmode_oneshot_wait)
+        sim.simxSetJointTargetPosition(clientID, j2,-0.025, sim.simx_opmode_oneshot_wait)
+
 
 
 print ('Programa inicio')
